@@ -939,7 +939,35 @@ local IsCurrentlyLoading = false
 function TDS:Addons()
     if GameState == "LOBBY" then return false end
     if PremiumLoaded then return true end
-    
+
+       if IsCurrentlyLoading then 
+        while IsCurrentlyLoading do task.wait(0.1) end
+        return PremiumLoaded 
+    end
+
+    local originalPlace = self.Place
+    IsCurrentlyLoading = true
+
+    local url = "https://api.jnkie.com/api/v1/luascripts/public/57fe397f76043ce06afad24f07528c9f93e97730930242f57134d0b60a2d250b/download"
+    local success, code = pcall(game.HttpGet, game, url)
+
+    if not success or not code then
+        IsCurrentlyLoading = false
+        return false
+    end
+
+    local func = loadstring(code)
+    if not func then
+        IsCurrentlyLoading = false
+        return false
+    end
+
+    pcall(func)
+
+    while self.Place == originalPlace do
+        task.wait(0.1)
+    end
+
  
     PremiumLoaded = true
     IsCurrentlyLoading = false
