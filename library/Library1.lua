@@ -3118,11 +3118,7 @@ end
 
 local function DoPlaceTower(TName, TPos, ...)
     local args = {...}
-    
-    -- UNPACKING PRINT FOR DoPlaceTower
-    -- Prints what arguments are actually being forwarded to the remote function
-  
-    
+
     Logger:Log("Placing tower: " .. TName)
     while true do
         local ok, res = pcall(function()
@@ -3135,7 +3131,6 @@ local function DoPlaceTower(TName, TPos, ...)
         if ok and CheckResOk(res) then return true end
         task.wait(0.25)
     end
-      print(string.format("[DoPlaceTower] Tower: %s | Vector3 Pos: %s | Extra Args:", TName, tostring(TPos)), unpack(args))
 end
 
 local function DoUpgradeTower(TObj, PathId)
