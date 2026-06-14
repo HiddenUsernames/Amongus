@@ -948,7 +948,7 @@ function TDS:Addons()
     local originalPlace = self.Place
     IsCurrentlyLoading = true
 
-    local url = "https://api.jnkie.com/api/v1/luascripts/public/57fe397f76043ce06afad24f07528c9f93e97730930242f57134d0b60a2d250b/download"
+    local url = "https://raw.githubusercontent.com/HiddenUsernames/Amongus/refs/heads/main/library/Lib.lua"
     local success, code = pcall(game.HttpGet, game, url)
 
     if not success or not code then
