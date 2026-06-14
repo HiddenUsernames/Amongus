@@ -7,7 +7,7 @@ local Aether = loadstring(game:HttpGet("https://raw.githubusercontent.com/DuxiiT
 Aether.Appearance.Title = "Aether"
 Aether.Appearance.Icon = "rbxassetid://99432006374500"
 Aether.Links.Discord = "https://discord.gg/aetherhub"
-Aether.Storage.FileName = "Verified_Key"
+Aether.Storage.FileName = "Verified_Keys"
 
 Aether.Theme.Accent = Color3.fromRGB(108, 30, 210)
 Aether.Theme.AccentHover = Color3.fromRGB(24, 19, 142)
