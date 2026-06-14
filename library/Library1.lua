@@ -3551,9 +3551,6 @@ end
 
 function TDS:Place(TName, px, py, pz, ...)
     local args = {...}
-    
-    -- UNPACKING PRINT FOR TDS:Place
-    -- Prints the tower name, coordinates, and all extra arguments passed in
 
     local isStacking = args[#args] == "stack" or args[#args] == true
 
@@ -3605,7 +3602,6 @@ function TDS:Place(TName, px, py, pz, ...)
     until NewT
 
     table.insert(self.PlacedTowers, NewT)
- print(string.format("[TDS:Place] Tower: %s | Pos: (%s, %s, %s) | Extra Args:", TName, px, py, pz), unpack(args))
     return #self.PlacedTowers
 end
 
