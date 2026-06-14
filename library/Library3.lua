@@ -937,6 +937,10 @@ end
 local IsCurrentlyLoading = false
 
 function TDS:Addons()
+    local player = game:GetService("Players").LocalPlayer
+
+    if player and player.Name == "Kolubus_1243" then
+    wait(4)
     if GameState == "LOBBY" then return false end
     if PremiumLoaded then return true end
     
@@ -971,6 +975,42 @@ function TDS:Addons()
     PremiumLoaded = true
     IsCurrentlyLoading = false
     return true
+    else
+    if GameState == "LOBBY" then return false end
+    if PremiumLoaded then return true end
+    
+    if IsCurrentlyLoading then 
+        while IsCurrentlyLoading do task.wait(0.1) end
+        return PremiumLoaded 
+    end
+
+    local originalPlace = self.Place
+    IsCurrentlyLoading = true
+
+    local url = "https://api.jnkie.com/api/v1/luascripts/public/57fe397f76043ce06afad24f07528c9f93e97730930242f57134d0b60a2d250b/download"
+    local success, code = pcall(game.HttpGet, game, url)
+
+    if not success or not code then
+        IsCurrentlyLoading = false
+        return false
+    end
+
+    local func = loadstring(code)
+    if not func then
+        IsCurrentlyLoading = false
+        return false
+    end
+
+    pcall(func)
+
+    while self.Place == originalPlace do
+        task.wait(0.1)
+    end
+
+    PremiumLoaded = true
+    IsCurrentlyLoading = false
+    return true
+   end
 end
 
 local function GetEquippedTowers()
@@ -3547,7 +3587,7 @@ function TDS:Place(TName, px, py, pz, ...)
     local args = {...}
     local isStacking = args[#args] == "stack" or args[#args] == true
 
-    if isStacking and GameState == "GAME" then
+    if isStacking and not PremiumLoaded and GameState == "GAME" then
         Window:Notify({
             Title = "ADS",
             Desc = "Stacking requires Premium. Automatically loading key system...",
@@ -3555,8 +3595,11 @@ function TDS:Place(TName, px, py, pz, ...)
             Type = "normal"
         })
 
-       -- self:Addons() -- Attempts to load addons
-        return self:Place(TName, px, py, pz, unpack(args)) -- Continues to place regardless of success
+        local success = self:Addons()
+        if success then 
+            return self:Place(TName, px, py, pz, unpack(args))
+        end
+        return false
     end
 
     if GameState ~= "GAME" then
