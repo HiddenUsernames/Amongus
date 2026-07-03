@@ -12,10 +12,7 @@ local TARGET_PLACE_ID = 3260590327
 function Multiplayer.StartHost(playerToInviteName, Mode)
     if game.PlaceId ~= TARGET_PLACE_ID then return end
 
-    print("[" .. LocalPlayer.Name .. "] Starting party as Host for Mode: " .. tostring(Mode))
-
-    -- Create the party
-    Event:InvokeServer("Party", "CreateParty", nil)
+    print("[" .. LocalPlayer.Name .. "] Starting Host cycle for Mode: " .. tostring(Mode))
     
     -- Locate UI paths
     local playerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -25,38 +22,44 @@ function Multiplayer.StartHost(playerToInviteName, Mode)
         :WaitForChild("currentParty")
         :WaitForChild("partyMembers")
 
-    local lastInviteTime = 0
-    local inviteCooldown = 2 -- Seconds between re-invites
+    print("Entering Create -> Invite -> Leave loop. Waiting for " .. playerToInviteName .. "...")
 
-    print("Entering INFINITE invitation loop. Will invite " .. playerToInviteName .. " until slot '1' exists...")
-
-    -- Infinite loop: will only stop when the player joins
     while true do
-        -- INSTANT CHECK: If player is in the slot, break immediately!
-        if partyMembers:FindFirstChild("1") then
-            break
-        end
+        -- 1. Create the party
+        Event:InvokeServer("Party", "CreateParty", nil)
+        task.wait(0.1) -- Small breath for server replication
 
-        -- Check if target player is in the server
+        -- Check immediately if they managed to join right as we made it
+        if partyMembers:FindFirstChild("1") then break end
+
+        -- 2. Attempt to invite the target player if they are in the server
         local targetPlayer = Players:FindFirstChild(playerToInviteName)
-        
         if targetPlayer then
-            -- Only invite if the invite cooldown has passed
-            if os.clock() - lastInviteTime >= inviteCooldown then
-                print("Sending/Re-sending invite to: " .. targetPlayer.Name)
-                
-                -- Wrap in coroutine so InvokeServer doesn't block the loop's speed
-                coroutine.wrap(function()
-                    Event:InvokeServer("Party", "InvitePlayer", targetPlayer)
-                end)()
-                
-                lastInviteTime = os.clock()
-            end
+            print("Creating fresh party & sending invite to: " .. targetPlayer.Name)
+            coroutine.wrap(function()
+                Event:InvokeServer("Party", "InvitePlayer", targetPlayer)
+            end)()
         else
             print("Waiting for " .. playerToInviteName .. " to appear in the server list...")
         end
 
-        -- Small incremental check interval for instant response
+        -- 3. Give the player a short window to accept before we cycle
+        -- Adjust this wait time (e.g., 0.5 to 1.5) depending on how fast their client accepts
+        local windowStart = os.clock()
+        while os.clock() - windowStart < 1.0 do
+            if partyMembers:FindFirstChild("1") then
+                break
+            end
+            task.wait(0.1)
+        end
+
+        -- 4. Final check before breaking or leaving
+        if partyMembers:FindFirstChild("1") then 
+            break 
+        end
+
+        -- 5. If they didn't join in time, leave the party and loop back to recreate it
+        Event:InvokeServer("Party", "LeaveParty")
         task.wait(0.2)
     end
     
@@ -96,7 +99,7 @@ function Multiplayer.JoinLobby(HostName)
             Event:InvokeServer("Party", "AcceptInvite", hostPlayer)
         end)()
 
-        task.wait(0.2)
+        task.wait(0.1) -- Slightly faster response time to match the host recreate rate
     end
 
     print("Left lobby place. Stopped spamming AcceptInvite.")
