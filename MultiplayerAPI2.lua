@@ -63,7 +63,7 @@ function Multiplayer.StartHost(playerToInviteName, Mode)
         else
             print("Player didn't join fast enough. Leaving party to reset...")
             Event:InvokeServer("Party", "LeaveParty")
-            task.wait(0.2) -- Brief pause before making a new party
+            task.wait(0.5) -- Brief pause before making a new party
         end
     end
 
@@ -91,18 +91,17 @@ function Multiplayer.JoinLobby(HostName)
         warn("Could not join lobby: Host " .. HostName .. " not found.")
         return
     end
-    print("Spamming AcceptInvite until match teleportation begins...")
 
-    -- Keeps firing until the PlaceId changes (meaning the host started the match and you are teleporting)
-    while game.PlaceId == TARGET_PLACE_ID do
+    print("Spamming AcceptInvite...")
+
+    while true do
         coroutine.wrap(function()
             Event:InvokeServer("Party", "AcceptInvite", hostPlayer)
         end)()
 
-        task.wait(0.1) -- Slightly faster response time for acceptance
+        task.wait(0.1)
     end
-
-    print("Left lobby place. Stopped spamming AcceptInvite.")
 end
+
 
 return Multiplayer
