@@ -26,7 +26,7 @@ function Multiplayer.StartHost(playerToInviteName, Mode)
         -- 1. Create the party
         print("[" .. LocalPlayer.Name .. "] Creating party...")
         Event:InvokeServer("Party", "CreateParty", nil)
-        task.wait(0.2) -- Brief pause to allow the party to initialize
+        task.wait(1) -- Brief pause to allow the party to initialize
 
         -- INSTANT CHECK: If player is already in the slot somehow, break immediately!
         if partyMembers:FindFirstChild("1") then
