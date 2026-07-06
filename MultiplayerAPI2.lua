@@ -12,26 +12,13 @@ local TARGET_PLACE_ID = 3260590327
 function Multiplayer.StartHost(playerToInviteName, Mode)
     if game.PlaceId ~= TARGET_PLACE_ID then return end
 
-    -- Locate UI paths
-    local playerGui = LocalPlayer:WaitForChild("PlayerGui")
-    local partyMembers = playerGui
-        :WaitForChild("ReactLobbyParty")
-        :WaitForChild("party")
-        :WaitForChild("currentParty")
-        :WaitForChild("partyMembers")
-
-    print("Entering Cycle: Create -> Invite -> Leave loop until " .. playerToInviteName .. " joins...")
+    print("Entering Cycle: Create -> Invite loop until " .. playerToInviteName .. " is processed...")
 
     while true do
         -- 1. Create the party
         print("[" .. LocalPlayer.Name .. "] Creating party...")
         Event:InvokeServer("Party", "CreateParty", nil)
         task.wait(1) -- Brief pause to allow the party to initialize
-
-        -- INSTANT CHECK: If player is already in the slot somehow, break immediately!
-        if partyMembers:FindFirstChild("1") then
-            break
-        end
 
         -- 2. Check if target player is in the server and invite them
         local targetPlayer = Players:FindFirstChild(playerToInviteName)
@@ -41,33 +28,19 @@ function Multiplayer.StartHost(playerToInviteName, Mode)
                 Event:InvokeServer("Party", "InvitePlayer", targetPlayer)
             end)()
             
-            -- 3. Give the player a window to accept the invite
-            -- Loops in small intervals so it can catch an instant join
-            local checkWindow = 0.4 
-            local elapsed = 0
-            while elapsed < checkWindow do
-                if partyMembers:FindFirstChild("1") then
-                    break
-                end
-                task.wait(0.1)
-                elapsed = elapsed + 0.1
-            end
+            -- 3. Give the player a fixed window to accept the invite
+            print("Waiting for " .. playerToInviteName .. " to accept...")
+            task.wait(3) -- Adjust this delay (in seconds) if your partner needs more time to load/accept
+            
+            -- Exit the loop now that the invitation sequence has been sent
+            break
         else
             print("Waiting for " .. playerToInviteName .. " to appear in the server list...")
             task.wait(1)
         end
-
-        -- Final check before leaving the party to repeat the cycle
-        if partyMembers:FindFirstChild("1") then
-            break
-        else
-            print("Player didn't join fast enough. Leaving party to reset...")
-            Event:InvokeServer("Party", "LeaveParty")
-            task.wait(0.5) -- Brief pause before making a new party
-        end
     end
 
-    print("Player successfully detected in party slot [1]! Starting match instantly...")
+    print("Sending match start request...")
     Event:InvokeServer(
         "Multiplayer",
         "v2:start",
