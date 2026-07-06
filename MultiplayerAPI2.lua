@@ -98,6 +98,7 @@ function Multiplayer.JoinLobby(HostName)
         coroutine.wrap(function()
             Event:InvokeServer("Party", "AcceptInvite", hostPlayer)
         end)()
+        print("TRying")
 
         task.wait(0.1)
     end
