@@ -61,9 +61,10 @@ function Multiplayer.StartHost(playerToInviteName, Mode)
         if partyMembers:FindFirstChild("1") then
             break
         else
+               task.wait(10) -- Brief pause before making a new party
             print("Player didn't join fast enough. Leaving party to reset...")
             Event:InvokeServer("Party", "LeaveParty")
-            task.wait(10) -- Brief pause before making a new party
+         
         end
     end
 
