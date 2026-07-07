@@ -117,7 +117,7 @@ function Multiplayer.StartHost(playerToInviteName, Mode)
 
             Event:InvokeServer("Party", "LeaveParty")
 
-            task.wait(1) -- Brief pause before making a new party
+            task.wait(10) -- Brief pause before making a new party
 
         end
 
@@ -165,7 +165,7 @@ function Multiplayer.JoinLobby(HostName)
         end)()
         print("TRying")
    Event:InvokeServer("Party", "AcceptInvite", hostPlayer)
-        task.wait(0.1)
+        task.wait(1)
     end
 end
 
