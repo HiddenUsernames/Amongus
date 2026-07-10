@@ -8,7 +8,7 @@ local activeNotifications = {}
 local notificationUniqueId = "Potassium_Notification_Layer"
 
 -- Automatically fetch the external theme module inside the library
-local ThemesUrl = "https://raw.githubusercontent.com/HiddenUsernames/Amongus/refs/heads/main/library/Themese.lua" -- <-- PUT YOUR RAW THEMES.LUA LINK HERE
+local ThemesUrl = "https://raw.githubusercontent.com/HiddenUsernames/Amongus/refs/heads/main/library/Themes.lua" -- <-- PUT YOUR RAW THEMES.LUA LINK HERE
 local Themes = loadstring(game:HttpGet(ThemesUrl))()
 
 -- Color table that will hold active colors
