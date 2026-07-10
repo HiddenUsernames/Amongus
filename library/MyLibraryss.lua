@@ -7,6 +7,11 @@ local RunService = game:GetService("RunService")
 local activeNotifications = {}
 local notificationUniqueId = "Potassium_Notification_Layer"
 
+-- Automatically fetch the external theme module inside the library
+local ThemesUrl = "https://raw.githubusercontent.com/HiddenUsernames/Amongus/refs/heads/main/library/Themes.lua" -- <-- PUT YOUR RAW THEMES.LUA LINK HERE
+local Themes = loadstring(game:HttpGet(ThemesUrl))()
+
+-- Fallback default colors in case the theme loading fails or isn't specified
 local COLORS = {
     Window = Color3.fromRGB(15, 15, 20),
     Header = Color3.fromRGB(22, 22, 28),
@@ -77,7 +82,7 @@ local function setTabVisualState(tabButton, isSelected)
     local icon = tabButton:FindFirstChild("TabIcon")
     local label = tabButton:FindFirstChild("TabLabel")
 
-    tabButton.BackgroundColor3 = isSelected and Color3.fromRGB(32, 32, 42) or Color3.fromRGB(20, 20, 26)
+    tabButton.BackgroundColor3 = isSelected and (COLORS.TabSelected or Color3.fromRGB(32, 32, 42)) or (COLORS.TabIdle or Color3.fromRGB(20, 20, 26))
 
     if label then
         label.TextColor3 = isSelected and Color3.fromRGB(255, 255, 255) or COLORS.Muted
@@ -99,7 +104,22 @@ local function setTabVisualState(tabButton, isSelected)
     end
 end
 
-function MyUiLibrary:CreateWindow(hubName, hubSubtitle)
+-- New Function to inject custom theme tables dynamically
+function MyUiLibrary:SetTheme(themeName)
+    if Themes and Themes[themeName] then
+        local targetTheme = Themes[themeName]
+        for key, color in pairs(targetTheme) do
+            COLORS[key] = color
+        end
+    end
+end
+
+function MyUiLibrary:CreateWindow(hubName, hubSubtitle, themeName)
+    -- Apply requested theme right at window creation if passed
+    if themeName then
+        self:SetTheme(themeName)
+    end
+
     local uniqueName = "Potassium_Custom_Hub"
     local windowW, windowH = 620, 480
     local headerH = 54
@@ -291,7 +311,7 @@ function MyUiLibrary:CreateWindow(hubName, hubSubtitle)
 
         local TabButton = Instance.new("TextButton")
         TabButton.Size = UDim2.new(1, 0, 0, 38)
-        TabButton.BackgroundColor3 = isFirst and Color3.fromRGB(32, 32, 42) or Color3.fromRGB(20, 20, 26)
+        TabButton.BackgroundColor3 = isFirst and (COLORS.TabSelected or Color3.fromRGB(32, 32, 42)) or (COLORS.TabIdle or Color3.fromRGB(20, 20, 26))
         TabButton.Text = ""
         TabButton.AutoButtonColor = false
         TabButton.ClipsDescendants = true
@@ -349,12 +369,12 @@ function MyUiLibrary:CreateWindow(hubName, hubSubtitle)
 
         TabButton.MouseEnter:Connect(function()
             if not TabPage.Visible then
-                tween(TabButton, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(26, 26, 34)})
+                tween(TabButton, TweenInfo.new(0.12), {BackgroundColor3 = COLORS.TabHover or Color3.fromRGB(26, 26, 34)})
             end
         end)
         TabButton.MouseLeave:Connect(function()
             if not TabPage.Visible then
-                tween(TabButton, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(20, 20, 26)})
+                tween(TabButton, TweenInfo.new(0.12), {BackgroundColor3 = COLORS.TabIdle or Color3.fromRGB(20, 20, 26)})
             end
         end)
 
@@ -439,7 +459,7 @@ function MyUiLibrary:CreateWindow(hubName, hubSubtitle)
             Instance.new("UICorner", BaseFrame).CornerRadius = UDim.new(0, 7)
 
             local EStroke = Instance.new("UIStroke")
-            EStroke.Color = Color3.fromRGB(38, 38, 50)
+            EStroke.Color = COLORS.RowStroke or Color3.fromRGB(38, 38, 50)
             EStroke.Thickness = 1
             EStroke.Parent = BaseFrame
 
@@ -544,7 +564,7 @@ function MyUiLibrary:CreateWindow(hubName, hubSubtitle)
             Track.Name = "Track"
             Track.Size = UDim2.new(0, 200, 0, 5)
             Track.Position = UDim2.new(1, -230, 0.5, 4)
-            Track.BackgroundColor3 = Color3.fromRGB(50, 50, 62)
+            Track.BackgroundColor3 = COLORS.Track or Color3.fromRGB(50, 50, 62)
             Track.Parent = Frame
             Instance.new("UICorner", Track).CornerRadius = UDim.new(1, 0)
 
@@ -638,7 +658,7 @@ function MyUiLibrary:CreateWindow(hubName, hubSubtitle)
             local DropBox = Instance.new("TextButton")
             DropBox.Size = UDim2.new(0, 148, 0, 30)
             DropBox.Position = UDim2.new(1, -158, 0.5, -15)
-            DropBox.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+            DropBox.BackgroundColor3 = COLORS.DropBg or Color3.fromRGB(20, 20, 28)
             DropBox.Text = ""
             DropBox.AutoButtonColor = false
             DropBox.Parent = Frame
@@ -673,7 +693,7 @@ function MyUiLibrary:CreateWindow(hubName, hubSubtitle)
             DropList.Name = "DropList"
             DropList.Size = UDim2.new(0, 148, 0, 0)
             DropList.Position = UDim2.new(1, -158, 1, 4)
-            DropList.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+            DropList.BackgroundColor3 = COLORS.DropBg or Color3.fromRGB(20, 20, 28)
             DropList.Visible = false
             DropList.ClipsDescendants = true
             DropList.ZIndex = 20
@@ -707,7 +727,7 @@ function MyUiLibrary:CreateWindow(hubName, hubSubtitle)
             for _, opt in ipairs(options) do
                 local OptBtn = Instance.new("TextButton")
                 OptBtn.Size = UDim2.new(1, -4, 0, 26)
-                OptBtn.BackgroundColor3 = Color3.fromRGB(32, 32, 42)
+                OptBtn.BackgroundColor3 = COLORS.DropItem or Color3.fromRGB(32, 32, 42)
                 OptBtn.Text = opt
                 OptBtn.TextColor3 = COLORS.Muted
                 OptBtn.TextSize = 11
@@ -717,11 +737,11 @@ function MyUiLibrary:CreateWindow(hubName, hubSubtitle)
                 Instance.new("UICorner", OptBtn).CornerRadius = UDim.new(0, 4)
 
                 OptBtn.MouseEnter:Connect(function()
-                    OptBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 52)
+                    OptBtn.BackgroundColor3 = COLORS.DropItemHover or Color3.fromRGB(40, 40, 52)
                     OptBtn.TextColor3 = COLORS.Title
                 end)
                 OptBtn.MouseLeave:Connect(function()
-                    OptBtn.BackgroundColor3 = Color3.fromRGB(32, 32, 42)
+                    OptBtn.BackgroundColor3 = COLORS.DropItem or Color3.fromRGB(32, 32, 42)
                     OptBtn.TextColor3 = COLORS.Muted
                 end)
                 OptBtn.MouseButton1Click:Connect(function()
@@ -762,7 +782,7 @@ function MyUiLibrary:CreateWindow(hubName, hubSubtitle)
             local InputBox = Instance.new("Frame")
             InputBox.Size = UDim2.new(0, 90, 0, 30)
             InputBox.Position = UDim2.new(1, -100, 0.5, -15)
-            InputBox.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+            InputBox.BackgroundColor3 = COLORS.InputBg or Color3.fromRGB(20, 20, 28)
             InputBox.Parent = Frame
             Instance.new("UICorner", InputBox).CornerRadius = UDim.new(0, 6)
 
