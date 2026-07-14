@@ -799,7 +799,7 @@ TDS:Mode("%s")%s
 
 ]], tower1, tower2, tower3, tower4, tower5, current_mode, game_info_str)
 
-                    writefile("Player[1].lua", config_header)
+                    writefile("Player[2].lua", config_header)
                 end
 
                 Window:Notify({
@@ -818,10 +818,10 @@ TDS:Mode("%s")%s
                 Globals.record_strat = false
                 if has_hook then
                     Recorder:Clear()
-                    Recorder:Log("Strategy saved, you may find it in \nyour workspace folder called 'Player[1].lua'")
+                    Recorder:Log("Strategy saved, you may find it in \nyour workspace folder called 'Player[2].lua'")
                     Window:Notify({
                         Title = "ADS",
-                        Desc = "Recording has been saved! Check your workspace folder for Player[1].lua",
+                        Desc = "Recording has been saved! Check your workspace folder for Player[2].lua",
                         Time = 3,
                         Type = "normal"
                     })
