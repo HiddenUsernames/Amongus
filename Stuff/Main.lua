@@ -207,6 +207,8 @@ local StackEnabled = false
 local SelectedTower = nil
 local StackSphere = nil
 
+local AutoRematchRunning = false
+
 local AllModifiers = {
     "HiddenEnemies", "Glass", "ExplodingEnemies", "Limitation", 
     "Committed", "HealthyEnemies", "Fog", "FlyingEnemies", 
@@ -231,6 +233,7 @@ local DefaultSettings = {
     AutoNecro = false,
     AutoRejoin = true,
     AutoRestart = true,
+    AutoRematch = false,
     PrivateCode = "",
     TimeScaleEnabled = false,
     TimeScaleValue = 2,
@@ -1321,6 +1324,15 @@ local Automation = Window:Tab({Title = "Automation", Icon = "bot"}) do
             end
         })
     end
+
+    Automation:Toggle({
+        Title = "Auto Rematch",
+        Desc = "Automatically votes or requests a rematch when the game ends",
+        Value = Globals.AutoRematch,
+        Callback = function(v)
+            SetSetting("AutoRematch", v)
+        end
+    })
 
    local RejoinBTN = Automation:Button({
         Title = "Rejoin Game",
