@@ -1146,6 +1146,64 @@ local function StartAutoReady()
     end)
 end
 
+local function InitAutoAutomation()
+        if AutoRematchRunning or not Globals.AutoRematch or GameState ~= "GAME" then return end
+         AutoRematchRunning = true
+    task.spawn(function()
+        local Players = game:GetService("Players")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local LocalPlayer = Players.LocalPlayer
+
+        -- 1. Auto-Ready Logic
+            local stateReplicators = ReplicatedStorage:WaitForChild("StateReplicators", 10)
+            local voteReplicator = stateReplicators and stateReplicators:WaitForChild("VoteReplicator", 10)
+            
+            if voteReplicator then
+                repeat task.wait(0.1) until voteReplicator:GetAttribute("Enabled") == true and voteReplicator:GetAttribute("Title") == "Ready?"
+                
+                if typeof(RunVoteSkip) == "function" then
+                    RunVoteSkip()
+                end
+                
+                repeat task.wait(0.1) until voteReplicator:GetAttribute("Enabled") == false
+            end
+            
+            AutoRematchRunning = false
+        end
+
+        -- 2. Auto-Restart / Rematch Logic
+        if AutoRestartRunning then
+            local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+            local reactGameNewRewards = playerGui:WaitForChild("ReactGameNewRewards", 10)
+            if not reactGameNewRewards then return end
+
+            local textLabel = reactGameNewRewards
+                :WaitForChild("Frame", 10)
+                :WaitForChild("gameOver", 10)
+                :WaitForChild("RewardsScreen", 10)
+                :WaitForChild("RewardBanner", 10)
+                :WaitForChild("TextLabel", 10)
+
+            if not textLabel then return end
+
+            local rematchRemote = ReplicatedStorage:WaitForChild("Network")
+                :WaitForChild("GameManager")
+                :WaitForChild("RE:Rematch")
+
+            local function checkBannerText()
+                if not AutoRestartRunning then return end
+                if string.find(string.upper(textLabel.Text), "TRIUMPH") then
+                    task.wait(0.5)
+                    rematchRemote:FireServer()
+                end
+            end
+
+            textLabel:GetPropertyChangedSignal("Text"):Connect(checkBannerText)
+            checkBannerText()
+        end
+    end)
+end
+
 local EasyModeRunning = false
 
 local function StartEasyMode()
@@ -4756,6 +4814,10 @@ task.spawn(function()
 
         if (Globals.AutoRejoin or Globals.AutoRestart) and not BackToLobbyRunning then
             StartBackToLobby()
+        end
+
+        if Globals.AutoRematch and not AutoRematchRunning then
+            InitAutoAutomation()
         end
 
         if Globals.AutoGatling and not AutoGatlingRunning then
