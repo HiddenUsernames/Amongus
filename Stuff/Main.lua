@@ -1376,15 +1376,6 @@ local Automation = Window:Tab({Title = "Automation", Icon = "bot"}) do
         })
     end
 
-    Automation:Toggle({
-        Title = "Auto Rematch",
-        Desc = "Automatically votes or requests a rematch when the game ends",
-        Value = Globals.AutoRematch,
-        Callback = function(v)
-            SetSetting("AutoRematch", v)
-        end
-    })
-
    local RejoinBTN = Automation:Button({
         Title = "Rejoin Game",
         Desc = "Stuck?",
