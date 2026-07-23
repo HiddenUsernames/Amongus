@@ -1147,60 +1147,65 @@ local function StartAutoReady()
 end
 
 local function InitAutoAutomation()
-        if AutoRematchRunning or not Globals.AutoRematch or GameState ~= "GAME" then return end
-         AutoRematchRunning = true
+    if AutoRematchRunning or not Globals.AutoRematch or GameState ~= "GAME" then 
+        return 
+    end
+    
+    AutoRematchRunning = true
+
     task.spawn(function()
         local Players = game:GetService("Players")
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local LocalPlayer = Players.LocalPlayer
 
         -- 1. Auto-Ready Logic
-            local stateReplicators = ReplicatedStorage:WaitForChild("StateReplicators", 10)
-            local voteReplicator = stateReplicators and stateReplicators:WaitForChild("VoteReplicator", 10)
-            
-            if voteReplicator then
-                repeat task.wait(0.1) until voteReplicator:GetAttribute("Enabled") == true and voteReplicator:GetAttribute("Title") == "Ready?"
-                
+        local stateReplicators = ReplicatedStorage:WaitForChild("StateReplicators", 10)
+        local voteReplicator = stateReplicators and stateReplicators:WaitForChild("VoteReplicator", 10)
+        
+        if voteReplicator then
+            if voteReplicator:GetAttribute("Enabled") == true and voteReplicator:GetAttribute("Title") == "Ready?" then
                 if typeof(RunVoteSkip) == "function" then
                     RunVoteSkip()
                 end
-                
-                repeat task.wait(0.1) until voteReplicator:GetAttribute("Enabled") == false
             end
-            
-            AutoRematchRunning = false
         end
 
-        -- 2. Auto-Restart / Rematch Logic
-        if AutoRestartRunning then
-            local playerGui = LocalPlayer:WaitForChild("PlayerGui")
-            local reactGameNewRewards = playerGui:WaitForChild("ReactGameNewRewards", 10)
-            if not reactGameNewRewards then return end
+        -- 2. Auto-Rematch / Restart Logic when game ends
+        local playerGui = LocalPlayer:WaitForChild("PlayerGui", 10)
+        local reactGameNewRewards = playerGui and playerGui:WaitForChild("ReactGameNewRewards", 15)
+        
+        if reactGameNewRewards then
+            local frame = reactGameNewRewards:WaitForChild("Frame", 10)
+            local gameOver = frame and frame:WaitForChild("gameOver", 10)
+            local rewardsScreen = gameOver and gameOver:WaitForChild("RewardsScreen", 10)
+            local rewardBanner = rewardsScreen and rewardsScreen:WaitForChild("RewardBanner", 10)
+            local textLabel = rewardBanner and rewardBanner:WaitForChild("TextLabel", 10)
 
-            local textLabel = reactGameNewRewards
-                :WaitForChild("Frame", 10)
-                :WaitForChild("gameOver", 10)
-                :WaitForChild("RewardsScreen", 10)
-                :WaitForChild("RewardBanner", 10)
-                :WaitForChild("TextLabel", 10)
+            if textLabel then
+                local rematchRemote = ReplicatedStorage:WaitForChild("Network", 5)
+                    and ReplicatedStorage.Network:WaitForChild("GameManager", 5)
+                    and ReplicatedStorage.Network.GameManager:WaitForChild("RE:Rematch", 5)
 
-            if not textLabel then return end
-
-            local rematchRemote = ReplicatedStorage:WaitForChild("Network")
-                :WaitForChild("GameManager")
-                :WaitForChild("RE:Rematch")
-
-            local function checkBannerText()
-                if not AutoRestartRunning then return end
-                if string.find(string.upper(textLabel.Text), "TRIUMPH") then
-                    task.wait(0.5)
-                    rematchRemote:FireServer()
+                local function checkBannerAndRematch()
+                    if not Globals.AutoRematch then return end
+                    
+                    local bannerText = string.upper(textLabel.Text or "")
+                    -- Triggers on either Win (TRIUMPH) or Loss (GAME OVER / DEFEAT)
+                    if bannerText:find("TRIUMPH") or bannerText:find("LOST") or bannerText:find("OVER") then
+                        task.wait(1)
+                        if rematchRemote then
+                            rematchRemote:FireServer()
+                            Logger:Log("Auto-Rematch triggered!")
+                        end
+                    end
                 end
-            end
 
-            textLabel:GetPropertyChangedSignal("Text"):Connect(checkBannerText)
-            checkBannerText()
+                textLabel:GetPropertyChangedSignal("Text"):Connect(checkBannerAndRematch)
+                checkBannerAndRematch()
+            end
         end
+
+        AutoRematchRunning = false
     end)
 end
 
