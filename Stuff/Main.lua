@@ -1157,19 +1157,7 @@ local function InitAutoAutomation()
         local Players = game:GetService("Players")
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local LocalPlayer = Players.LocalPlayer
-
-        -- 1. Auto-Ready Logic
-        local stateReplicators = ReplicatedStorage:WaitForChild("StateReplicators", 10)
-        local voteReplicator = stateReplicators and stateReplicators:WaitForChild("VoteReplicator", 10)
-        
-        if voteReplicator then
-            if voteReplicator:GetAttribute("Enabled") == true and voteReplicator:GetAttribute("Title") == "Ready?" then
-                if typeof(RunVoteSkip) == "function" then
-                    RunVoteSkip()
-                end
-            end
-        end
-
+            
         -- 2. Auto-Rematch / Restart Logic when game ends
         local playerGui = LocalPlayer:WaitForChild("PlayerGui", 10)
         local reactGameNewRewards = playerGui and playerGui:WaitForChild("ReactGameNewRewards", 15)
