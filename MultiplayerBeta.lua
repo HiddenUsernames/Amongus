@@ -29,10 +29,26 @@ function Multiplayer.StartHost(playerToInviteName, Mode, difficulty)
             for _, partyData in pairs(args[3]) do
                 if partyData and partyData.players and partyData.partyParams then
                     -- Verify if we are the host of this party
-                    if partyData.partyParams.host == LocalPlayer then
-                        -- Check if the target player is inside the players list
+                    local hostParam = partyData.partyParams.host
+                    local isHostMatch = (hostParam == LocalPlayer) or (typeof(hostParam) == "Instance" and hostParam == LocalPlayer)
+                    
+                    if isHostMatch then
+                        -- Check if the target player is inside the players list (handling instances, names, or userids)
                         for _, playerObj in pairs(partyData.players) do
-                            if typeof(playerObj) == "Instance" and playerObj.Name == playerToInviteName then
+                            local isTargetMatch = false
+                            
+                            if typeof(playerObj) == "Instance" and playerObj.Name:lower() == playerToInviteName:lower() then
+                                isTargetMatch = true
+                            elseif type(playerObj) == "string" and playerObj:lower() == playerToInviteName:lower() then
+                                isTargetMatch = true
+                            elseif type(playerObj) == "number" then
+                                local foundPlayer = Players:GetPlayerByUserId(playerObj)
+                                if foundPlayer and foundPlayer.Name:lower() == playerToInviteName:lower() then
+                                    isTargetMatch = true
+                                end
+                            end
+
+                            if isTargetMatch then
                                 gameStarted = true
                                 print("Player " .. playerToInviteName .. " successfully detected via RemoteEvent! Starting match instantly...")
                                 
@@ -56,7 +72,7 @@ function Multiplayer.StartHost(playerToInviteName, Mode, difficulty)
                                         }
                                     )
                                 else
-                                    -- For other modes (like Frost, Fallen, Molten, etc.), exclude/omit difficulty
+                                    -- For other modes (like Frost, Fallen, etc.), exclude/omit difficulty
                                     Event:InvokeServer(
                                         "Multiplayer",
                                         "v2:start",
