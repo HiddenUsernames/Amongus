@@ -10,7 +10,7 @@ local LocalPlayer = Players.LocalPlayer
 -- The specific Place ID allowed to run this code
 local TARGET_PLACE_ID = 3260590327
 
-function Multiplayer.StartHost(playerToInviteName, Mode)
+function Multiplayer.StartHost(playerToInviteName, Mode, difficulty)
     if game.PlaceId ~= TARGET_PLACE_ID then return end
 
     print("Entering Cycle: Create -> Invite -> Leave loop until " .. playerToInviteName .. " joins...")
@@ -40,15 +40,32 @@ function Multiplayer.StartHost(playerToInviteName, Mode)
                                     connection:Disconnect()
                                 end
                                 
-                                Event:InvokeServer(
-                                    "Multiplayer",
-                                    "v2:start",
-                                    {
-                                        difficulty = Mode or "Fallen",
-                                        mode = "survival",
-                                        count = 2
-                                    }
-                                )
+                                -- Format the mode and parameters dynamically
+                                local payloadMode = Mode or "survival"
+                                local payloadDifficulty = difficulty or "Fallen"
+
+                                -- If the mode is strictly Hardcore, include the difficulty parameter
+                                if payloadMode:lower() == "hardcore" then
+                                    Event:InvokeServer(
+                                        "Multiplayer",
+                                        "v2:start",
+                                        {
+                                            difficulty = payloadDifficulty,
+                                            mode = "hardcore",
+                                            count = 2
+                                        }
+                                    )
+                                else
+                                    -- For other modes (like Frost, Fallen, Molten, etc.), exclude/omit difficulty
+                                    Event:InvokeServer(
+                                        "Multiplayer",
+                                        "v2:start",
+                                        {
+                                            mode = payloadMode:lower(),
+                                            count = 2
+                                        }
+                                    )
+                                end
                                 break
                             end
                         end
