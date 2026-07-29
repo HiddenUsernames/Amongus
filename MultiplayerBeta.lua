@@ -10,7 +10,7 @@ local LocalPlayer = Players.LocalPlayer
 -- The specific Place ID allowed to run this code
 local TARGET_PLACE_ID = 3260590327
 
-function Multiplayer.StartHost(playerToInviteName, Mode, difficulty)
+function Multiplayer.StartHost(playerToInviteName, Mode)
     if game.PlaceId ~= TARGET_PLACE_ID then return end
 
     print("Entering Cycle: Create -> Invite -> Leave loop until " .. playerToInviteName .. " joins...")
@@ -29,26 +29,10 @@ function Multiplayer.StartHost(playerToInviteName, Mode, difficulty)
             for _, partyData in pairs(args[3]) do
                 if partyData and partyData.players and partyData.partyParams then
                     -- Verify if we are the host of this party
-                    local hostParam = partyData.partyParams.host
-                    local isHostMatch = (hostParam == LocalPlayer) or (typeof(hostParam) == "Instance" and hostParam == LocalPlayer)
-                    
-                    if isHostMatch then
-                        -- Check if the target player is inside the players list (handling instances, names, or userids)
+                    if partyData.partyParams.host == LocalPlayer then
+                        -- Check if the target player is inside the players list
                         for _, playerObj in pairs(partyData.players) do
-                            local isTargetMatch = false
-                            
-                            if typeof(playerObj) == "Instance" and playerObj.Name:lower() == playerToInviteName:lower() then
-                                isTargetMatch = true
-                            elseif type(playerObj) == "string" and playerObj:lower() == playerToInviteName:lower() then
-                                isTargetMatch = true
-                            elseif type(playerObj) == "number" then
-                                local foundPlayer = Players:GetPlayerByUserId(playerObj)
-                                if foundPlayer and foundPlayer.Name:lower() == playerToInviteName:lower() then
-                                    isTargetMatch = true
-                                end
-                            end
-
-                            if isTargetMatch then
+                            if typeof(playerObj) == "Instance" and playerObj.Name == playerToInviteName then
                                 gameStarted = true
                                 print("Player " .. playerToInviteName .. " successfully detected via RemoteEvent! Starting match instantly...")
                                 
@@ -56,32 +40,15 @@ function Multiplayer.StartHost(playerToInviteName, Mode, difficulty)
                                     connection:Disconnect()
                                 end
                                 
-                                -- Format the mode and parameters dynamically
-                                local payloadMode = Mode or "survival"
-                                local payloadDifficulty = difficulty or "Fallen"
-
-                                -- If the mode is strictly Hardcore, include the difficulty parameter
-                                if payloadMode:lower() == "hardcore" then
-                                    Event:InvokeServer(
-                                        "Multiplayer",
-                                        "v2:start",
-                                        {
-                                            difficulty = payloadDifficulty,
-                                            mode = "hardcore",
-                                            count = 2
-                                        }
-                                    )
-                                else
-                                    -- For other modes (like Frost, Fallen, etc.), exclude/omit difficulty
-                                    Event:InvokeServer(
-                                        "Multiplayer",
-                                        "v2:start",
-                                        {
-                                            mode = payloadMode:lower(),
-                                            count = 2
-                                        }
-                                    )
-                                end
+                                Event:InvokeServer(
+                                    "Multiplayer",
+                                    "v2:start",
+                                    {
+                                        difficulty = Mode or "Fallen",
+                                        mode = "survival",
+                                        count = 2
+                                    }
+                                )
                                 break
                             end
                         end
