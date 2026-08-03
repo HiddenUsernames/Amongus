@@ -52,7 +52,7 @@ Event:InvokeServer(
     {
         difficulty = Difficulty,
         mode = Mode,
-        count = 3
+        count = 2
     }
 )
                     else
