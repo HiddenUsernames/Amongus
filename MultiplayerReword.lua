@@ -46,15 +46,15 @@ function Multiplayer.StartHost(playerToInviteName, Mode, Difficulty)
                     local selectedMode = Mode or "Fallen"
                     
                     if selectedMode:lower() == "hardcore" then
-                         Event:InvokeServer(
-                            "Multiplayer",
-                            "v2:start",
-                            {
-                                 difficulty = Difficulty,
-                                 mode = Mode,
-                                 count = 2
-                            }
-                  )
+Event:InvokeServer(
+    "Multiplayer",
+    "v2:start",
+    {
+        difficulty = Difficulty,
+        mode = Mode,
+        count = 3
+    }
+)
                     else
                         Event:InvokeServer(
                             "Multiplayer",
