@@ -44,17 +44,28 @@ function Multiplayer.StartHost(playerToInviteName, Mode, Difficulty)
                     print("Target player " .. playerToInviteName .. " confirmed inside the party! Starting match...")
                     
                     local selectedMode = Mode or "Fallen"
+                    local lowerMode = selectedMode:lower()
                     
-                    if selectedMode:lower() == "hardcore" then
-Event:InvokeServer(
-    "Multiplayer",
-    "v2:start",
-    {
-        difficulty = Difficulty,
-        mode = Mode,
-        count = 2
-    }
-)
+                    -- Check for the special 3 modes: polluted, badlands, halloween
+                    if lowerMode == "polluted" or lowerMode == "badlands" or lowerMode == "halloween" then
+                        Event:InvokeServer(
+                            "Multiplayer",
+                            "v2:start",
+                            {
+                                count = 2,
+                                mode = selectedMode
+                            }
+                        )
+                    elseif lowerMode == "hardcore" then
+                        Event:InvokeServer(
+                            "Multiplayer",
+                            "v2:start",
+                            {
+                                difficulty = Difficulty,
+                                mode = Mode,
+                                count = 2
+                            }
+                        )
                     else
                         Event:InvokeServer(
                             "Multiplayer",
