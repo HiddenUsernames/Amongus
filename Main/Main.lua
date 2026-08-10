@@ -207,10 +207,16 @@ local StackEnabled = false
 local SelectedTower = nil
 local StackSphere = nil
 
+local AutoMedicRunning = false
+
 local AllModifiers = {
     "HiddenEnemies", "Glass", "ExplodingEnemies", "Limitation", 
     "Committed", "HealthyEnemies", "Fog", "FlyingEnemies", 
     "Broke", "SpeedyEnemies", "Quarantine", "JailedTowers", "Inflation"
+}
+
+local AllTowers = {
+    "EvolvedKingpin", "EvolvedJuggernaut", "EvolvedOperator", "Gatling Gun"
 }
 
 local DefaultSettings = {
@@ -254,6 +260,9 @@ local DefaultSettings = {
     StreamerName = "",
     tagName = "None",
     Modifiers = {},
+
+    AutoMedic = false,
+    Towerslot = {}
 }
 
 local TimeScaleValues = {0.5, 1, 1.5, 2}
@@ -1361,6 +1370,26 @@ local Automation = Window:Tab({Title = "Automation", Icon = "bot"}) do
         Value = Globals.AutoChain,
         Callback = function(v)
             SetSetting("AutoChain", v)
+        end
+    })
+
+    Automation:Toggle({
+        Title = "Auto Medic",
+        Desc = "Chains Medic Ability",
+        Value = Globals.AutoMedic,
+        Callback = function(v)
+            SetSetting("AutoMedic", v)
+        end
+    })
+
+    Automation:Dropdown({
+        Title = "Towers:",
+        Desc = "Selected towers must be near medic!",
+        List = AllTowers,
+        Value = Globals.Towerslot,
+        Multi = true,
+        Callback = function(choice)
+            SetSetting("Towerslot", choice)
         end
     })
 
