@@ -263,6 +263,8 @@ local DefaultSettings = {
 
     AutoMedic = false,
     Towerslot = {}
+
+    PlayerSelected = "",
 }
 
 local TimeScaleValues = {0.5, 1, 1.5, 2}
