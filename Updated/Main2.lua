@@ -266,6 +266,7 @@ local DefaultSettings = {
 
     AutoMedic = false,
     Towerslot = {}
+    PlayerSelected = "",
 }
 
 local TimeScaleValues = {0.5, 1, 1.5, 2}
@@ -1457,6 +1458,38 @@ local Automation = Window:Tab({Title = "Automation", Icon = "bot"}) do
             SetSetting("AutoMedic", v)
         end
     })
+
+    Automation:Textbox({
+    Title = "Target Player",
+    Desc = "Enter the Username or UserId of the player you want to target",
+    Placeholder = "Username or UserId...",
+    Value = Globals.PlayerSelected or "",
+    ClearTextOnFocus = false,
+    Callback = function(text)
+        -- Trim whitespace around the input
+        local validated = text:match("^%s*(.-)%s*$") or ""
+
+        -- Update global selection
+        Globals.PlayerSelected = validated
+        TargetPlayer = validated -- Keep local script variable updated
+        
+        -- Save setting if using configuration saving
+        if SetSetting then
+            SetSetting("PlayerSelected", validated)
+        end
+
+        print("[AutoMedic System]: Target player updated to:", validated)
+
+        -- If chain is actively running, restart it to target the newly typed player
+        if Globals.AutoMedic and AutoMedicRunning then
+            StopMedicChain()
+            if validated ~= "" then
+                task.wait(0.2)
+                StartMedicChain()
+            end
+        end
+    end
+})
 
     Automation:Dropdown({
         Title = "Towers:",
