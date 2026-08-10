@@ -265,7 +265,7 @@ local DefaultSettings = {
     Modifiers = {},
 
     AutoMedic = false,
-    Towerslot = {}
+    Towerslot = {},
     PlayerSelected = "",
 }
 
