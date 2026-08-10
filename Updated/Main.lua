@@ -4697,6 +4697,85 @@ local function StartSellFarm()
     end)
 end
 
+--== NEW STUFF 
+local AutoMedicLib = nil
+local TargetPlayer = "Zippy"
+
+local function StopMedicChain()
+    if AutoMedicLib then
+        -- Passing toggle = false cancels and destroys activeChainThread in the library
+        AutoMedicLib.Chain(TargetPlayer, {}, false)
+    end
+    AutoMedicRunning = false
+    print("[AutoMedic System]: Stopped active Medic chain thread.")
+end
+
+local function StartMedicChain()
+    AutoMedicRunning = true
+
+    task.spawn(function()
+        print("[AutoMedic System]: Checking for placed Medics...")
+
+        -- 1. Wait loop: continuously polls Workspace until at least 1 Medic is found
+        local myMedics = {}
+        repeat
+            myMedics = {}
+            local towersFolder = game:GetService("Workspace"):FindFirstChild("Towers")
+            
+            if towersFolder then
+                for _, tower in ipairs(towersFolder:GetChildren()) do
+                    local replicator = tower:FindFirstChild("TowerReplicator")
+                    if replicator then
+                        local ownerId = replicator:GetAttribute("OwnerId")
+                        local ownerName = replicator:GetAttribute("OwnerName")
+                        local towerName = replicator:GetAttribute("Name")
+
+                        local localPlayer = game:GetService("Players").LocalPlayer
+                        local isOwner = (ownerId and ownerId == localPlayer.UserId) or (ownerName and ownerName == localPlayer.Name)
+
+                        if isOwner and towerName and string.lower(towerName) == "medic" then
+                            table.insert(myMedics, tower)
+                        end
+                    end
+                end
+            end
+            
+            -- If no Medics found yet, wait 1 second before checking again
+            if #myMedics == 0 then
+                task.wait(1)
+            end
+        until #myMedics > 0 or not Globals.AutoMedic
+
+        -- 2. Check if AutoMedic was turned off while waiting
+        if not Globals.AutoMedic then
+            AutoMedicRunning = false
+            print("[AutoMedic System]: Canceled waiting loop (AutoMedic set to false).")
+            return
+        end
+
+        print(string.format("[AutoMedic System]: Found %d Medic(s)! Loading library...", #myMedics))
+
+        -- 3. Load the AutoMedic library via loadstring and readfile
+        if not AutoMedicLib then
+            local success, loadedLib = pcall(function()
+                return loadstring(readfile("AutoMedic.lua"))()
+            end)
+
+            if success and loadedLib then
+                AutoMedicLib = loadedLib
+            else
+                warn("[AutoMedic System]: Failed to load AutoMedic.lua! Make sure the file exists in your workspace folder.")
+                AutoMedicRunning = false
+                return
+            end
+        end
+
+        -- 4. Start the infinite loop Medic chain
+        print("[AutoMedic System]: Starting chain sequence...")
+        AutoMedicLib.Chain(TargetPlayer, Towerslot, true)
+    end)
+end
+
 function TDS:RemoveIndex()
     self.PlacedTowers = {}
     self.PlacedTraps = {}
@@ -4789,6 +4868,12 @@ task.spawn(function()
 
         if Globals.Easy and not EasyModeRunning then
             StartEasyMode()
+        end
+
+        if Globals.AutoMedic and not AutoMedicRunning then
+            StartMedicChain()
+        elseif not Globals.AutoMedic and AutoMedicRunning then
+            StopMedicChain()
         end
 
         task.wait(1)
