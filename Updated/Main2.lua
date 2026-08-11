@@ -4770,12 +4770,11 @@ end
 
 --== NEW STUFF 
 local AutoMedicLib = nil
-local TargetPlayer = "Zippy"
 
 local function StopMedicChain()
     if AutoMedicLib then
         -- Passing toggle = false cancels and destroys activeChainThread in the library
-        AutoMedicLib.Chain(TargetPlayer, {}, false)
+        AutoMedicLib.Chain("Universal", {}, false)
     end
     AutoMedicRunning = false
     print("[AutoMedic System]: Stopped active Medic chain thread.")
@@ -4843,7 +4842,7 @@ local function StartMedicChain()
 
         -- 4. Start the infinite loop Medic chain
         print("[AutoMedic System]: Starting chain sequence...")
-        AutoMedicLib.Chain(TargetPlayer, Towerslot, true)
+        AutoMedicLib.Chain("Universal", Towerslot, true)
     end)
 end
 
