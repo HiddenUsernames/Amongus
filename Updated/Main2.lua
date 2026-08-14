@@ -221,7 +221,7 @@ local AllTowers = {
     "Scout", "Sniper", "Paintballer", "Demoman", "Boomerang", "Slime Trooper", "Soldier",
     "Freezer", "Assassin", "Militant", "Shotgunner", "Hunter", "Pyromancer", "Ace Pilot", 
     "Electroshocker", "Rocketeer", "Trapper", "Crook Boss", "Warden", "Cowboy", "Tesla", 
-    "Saboteur" "Minigunner", "Ranger", "Pursuit", "Gatling Gun", "Turret", "Mortar",
+    "Saboteur", "Minigunner", "Ranger", "Pursuit", "Gatling Gun", "Turret", "Mortar",
     "Brawler", "Necromancer", "Accelerator", "Engineer", "Hacker", "EvolvedOperator", 
     "EvolvedKingpin", "EvolvedJuggernaut", "Gladiator","Commando","Slasher",
     "Frost Blaster", "Archer", "Swarmer", "Toxic Gunner", "Sledger", "Executioner",
